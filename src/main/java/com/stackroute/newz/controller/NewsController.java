@@ -1,8 +1,12 @@
 package com.stackroute.newz.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,16 +33,17 @@ import com.stackroute.newz.util.exception.NewsNotExistsException;
  * 
  * Please note that the default path to use this controller should be "/api/v1/news"
  */
-
+@RestController
+@RequestMapping("/api/v1")
 public class NewsController {
 
 	/*
 	 * Autowiring should be implemented for the NewsService. Please note that we
 	 * should not create any object using the new keyword
 	 */
-	
-	
-	
+	@Autowired
+	private NewsService newsService;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	/*
 	 * Define a handler method which will get us all news elements.
 	 * 
@@ -51,11 +56,13 @@ public class NewsController {
 	 * This handler method should map to the URL "/api/v1/news" using HTTP GET
 	 * method.
 	 */
-	
+	@GetMapping("/news")
+	public ResponseEntity<News> getAllNews(){
+		List<News> allNews = newsService.getAllNews();
+		logger.info("In controller - {}", "List of all news: "+allNews);
+		return new ResponseEntity<News>(HttpStatus.OK);
+	}
 
-	
-	
-	
 	/*
 	 * Define a handler method which will get us the news by a newsId.
 	 * 
@@ -68,10 +75,18 @@ public class NewsController {
 	 * This handler method should map to the URL "/api/v1/news/{newsId}" using HTTP GET
 	 * method, where "newsId" should be replaced by a valid newsId without {}
 	 */
-	
-	
-	
-	
+	@GetMapping("/news/{newsId}")
+	public ResponseEntity<Optional<News>> getNewsById(@PathVariable("newsId") Integer newsId) throws NewsNotExistsException{
+		News newsById = newsService.getNews(newsId);
+		if(newsById == null) {
+			logger.info("In controller - {}", "News ID "+newsId+ " not Found.");
+			return new ResponseEntity<Optional<News>>(HttpStatus.NOT_FOUND);
+		}
+		else {
+			logger.info("In controller - {}", "The news for news Id - " +newsId+ " is: "+newsById);
+			return new ResponseEntity<Optional<News>>(HttpStatus.OK);
+		}
+	}
 
 	/*
 	 * Define a handler method which will create a news by reading the Serialized
@@ -86,9 +101,18 @@ public class NewsController {
 	 * method".
 	 */
 	
-	
-	
-	
+	@PostMapping("/news")
+	public ResponseEntity<News> createNews(@RequestBody News news) throws NewsAlreadyExistsException{
+		for(News allNews: newsService.getAllNews()) {
+			if(allNews.getNewsId() == news.getNewsId()) {
+				logger.info("In controller - {}", "News ID "+ news.getNewsId() + " already exists.");
+				return new ResponseEntity<News>(HttpStatus.CONFLICT);
+			}
+		}
+		newsService.addNews(news);
+		logger.info("In controller - {}", "News created: " +news);
+		return new ResponseEntity<News>(HttpStatus.CREATED);
+	}
 	
 	/*
 	 * Define a handler method which will update a specific news by reading the
@@ -104,10 +128,20 @@ public class NewsController {
 	 * method, where "newsId" should be replaced by a valid newsId without {}
 	 */
 
+	@PutMapping("/news/{newsId}")
+	public ResponseEntity<News> updateNews(@PathVariable("newsId") Integer newsId, @RequestBody News news) throws NewsNotExistsException{
+			News getNews = newsService.getNews(newsId);
+			System.out.println("*******************************************");
+			System.out.println("Update newsService.getNews(newsId): "+getNews);
+			if(getNews != null) {
+				newsService.updateNews(news);
+				logger.info("In controller - {}", "News updated for news Id - " +newsId + " is: " +news);
+				return new ResponseEntity<News>(newsService.getNews(newsId), HttpStatus.OK);
+			}
+			logger.info("In controller - {}", "News not found for news Id - " +newsId);
+			return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
+	}
 	
-	
-	
-
 	/*
 	 * Define a handler method which will delete a news from the database.
 	 * 
@@ -119,7 +153,22 @@ public class NewsController {
 	 * Delete method" where "newsId" should be replaced by a valid newsId without {}
 	 */
 	
-	
-	
-
+	@DeleteMapping("/news/{newsId}")
+	public ResponseEntity<News> deleteNews(@PathVariable("newsId") Integer newsId){
+		try {
+			News getNews = newsService.getNews(newsId);
+			System.out.println("*******************************************");
+			System.out.println("Delete newsService.getNews(newsId): "+getNews);
+			if(getNews != null) {
+				newsService.deleteNews(newsId);
+				logger.info("In controller - {}", "News deleted for news Id - " +newsId);
+				return new ResponseEntity<News>(HttpStatus.OK);
+			}
+		} catch (NewsNotExistsException e) {
+			logger.info("In controller - {}", "News not found for news Id - " +newsId);
+			return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<News>(HttpStatus.OK);
+		
+	}
 }

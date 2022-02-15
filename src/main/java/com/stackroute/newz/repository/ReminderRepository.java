@@ -10,6 +10,6 @@ import com.stackroute.newz.model.Reminder;
 * Annotate this class with @Repository annotation
 * */
 @Repository 
-public interface ReminderRepository extends  JpaRepository<Reminder,Integer> {
+public interface ReminderRepository extends JpaRepository<Reminder,Integer> {
 
 }

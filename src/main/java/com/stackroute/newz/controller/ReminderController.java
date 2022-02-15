@@ -1,7 +1,10 @@
 package com.stackroute.newz.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +31,17 @@ import com.stackroute.newz.util.exception.ReminderNotExistsException;
  * 
  * Please note that the default path to use this controller should be "/api/v1/reminder"
  */
-
+@RestController
+@RequestMapping("/api/v1")
 public class ReminderController {
 
 	/*
 	 * Autowiring should be implemented for the ReminderService. Please note that we
 	 * should not create any object using the new keyword
 	 */
-	
-
+	@Autowired
+	private ReminderService reminderService;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	/*
 	 * Define a handler method which will get us all reminders.
 	 * 
@@ -47,10 +52,12 @@ public class ReminderController {
 	 * This handler method should map to the URL "/api/v1/reminder" using HTTP GET
 	 * method.
 	 */
-	
-	
-	
-	
+	@GetMapping("/reminder")
+	public ResponseEntity<Reminder> getAllReminders(){
+		List<Reminder> reminderList = reminderService.getAllReminders();
+		logger.info("In controller - {}", "List of all Reminders: "+reminderList);
+		return new ResponseEntity<Reminder>(HttpStatus.OK);
+	}
 
 	/*
 	 * Define a handler method which will get us the reminder by a reminderId.
@@ -64,9 +71,18 @@ public class ReminderController {
 	 * This handler method should map to the URL "/api/v1/reminder/{reminderId}" using HTTP GET
 	 * method, where "reminderId" should be replaced by a valid reminderId without {}
 	 */
-	
-	
-	
+	@GetMapping("/reminder/{reminderId}")
+	public ResponseEntity<Optional<Reminder>> getReminderById(@PathVariable Integer reminderId) throws ReminderNotExistsException{
+		Reminder reminderById = reminderService.getReminder(reminderId);
+		if(reminderById == null) {
+			logger.info("In controller - {}", "Reminder ID "+reminderId+ " not Found.");
+			return new ResponseEntity<Optional<Reminder>>(HttpStatus.NOT_FOUND);
+		}
+		else {
+			logger.info("In controller - {}", "The Reminder for Reminder Id - " +reminderId+ " is: "+reminderById);
+			return new ResponseEntity<Optional<Reminder>>(HttpStatus.OK);
+		}
+	}
 
 	/*
 	 * Define a handler method which will create a reminder by reading the Serialized
@@ -81,10 +97,18 @@ public class ReminderController {
 	 * This handler method should map to the URL "/api/v1/reminder" using HTTP POST
 	 * method".
 	 */
-	
-	
-	
-	
+	@PostMapping("/reminder")
+	public ResponseEntity<Reminder> createReminder(@RequestBody Reminder reminder) {
+		for(Reminder allReminders: reminderService.getAllReminders()) {
+			if(allReminders.getReminderId() == reminder.getReminderId()) {
+				logger.info("In controller - {}", "Reminder ID "+ reminder.getReminderId() + " already exists.");
+				return new ResponseEntity<Reminder>(HttpStatus.CONFLICT);
+			}
+		}
+		reminderService.addReminder(reminder);
+		logger.info("In controller - {}", "Reminder created: " +reminder);
+		return new ResponseEntity<Reminder>(HttpStatus.CREATED);
+	}
 
 	/*
 	 * Define a handler method which will update a specific reminder by reading the
@@ -99,9 +123,16 @@ public class ReminderController {
 	 * This handler method should map to the URL "/api/v1/reminder/{reminderId}" using HTTP PUT
 	 * method, where "reminderId" should be replaced by a valid reminderId without {}
 	 */
-	
-	
-	
+	@PutMapping("/reminder/{reminderId}")
+	public ResponseEntity<Reminder> updateReminder(@PathVariable("reminderId") Integer reminderId, @RequestBody Reminder reminder) throws ReminderNotExistsException {
+			if(reminderService.getReminder(reminderId) != null) {
+				reminderService.updateReminder(reminder);
+				logger.info("In controller - {}", "Reminder updated for Reminder Id - " +reminderId + " is: " +reminder);
+				return new ResponseEntity<Reminder>(HttpStatus.OK);
+			}
+		logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
+		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
+	}
 
 	/*
 	 * Define a handler method which will delete a reminder from the database.
@@ -115,7 +146,14 @@ public class ReminderController {
 	 * Delete method" where "reminderId" should be replaced by a valid reminderId without {}
 	 */
 	
-	
-	
-
+	@DeleteMapping("/reminder/{reminderId}")
+	public ResponseEntity<Reminder> deleteReminder(@PathVariable("reminderId") Integer reminderId) throws ReminderNotExistsException {
+			if(reminderService.getReminder(reminderId) != null) {
+				reminderService.deleteReminder(reminderId);
+				logger.info("In controller - {}", "Reminder deleted for Reminder Id - " +reminderId);
+				return new ResponseEntity<Reminder>(HttpStatus.OK);
+			}
+		logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
+		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
+	}
 }

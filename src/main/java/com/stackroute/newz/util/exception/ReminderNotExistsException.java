@@ -10,5 +10,9 @@ public class ReminderNotExistsException extends Exception {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public ReminderNotExistsException(String message){
+        super(message);
+    }
 
 }

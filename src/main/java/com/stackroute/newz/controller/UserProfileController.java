@@ -1,7 +1,10 @@
 package com.stackroute.newz.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +33,18 @@ import com.stackroute.newz.util.exception.UserProfileNotExistsException;
  * 
  * Please note that the default path to use this controller should be "/api/v1/news"
  */
-
+@RestController
+@RequestMapping("/api/v1")
 public class UserProfileController {
 
 	/*
 	 * Autowiring should be implemented for the UserProfileService. Please note that we
 	 * should not create any object using the new keyword
 	 */
+	@Autowired
+	private UserProfileService userProfileService;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-
 	/*
 	 * Define a handler method which will register a userProfile by reading the Serialized
 	 * UserProfile object from request body and save the userProfile in UserProfile table in database.
@@ -52,9 +58,18 @@ public class UserProfileController {
 	 * This handler method should map to the URL "/api/v1/user" using HTTP POST
 	 * method".
 	 */
-	
-	
-	
+	@PostMapping("/user")
+	public ResponseEntity<UserProfile> createUserProfile(@RequestBody UserProfile userProfile) throws UserProfileAlreadyExistsException{
+			for(UserProfile allUserProfile: userProfileService.getAllUserProfiles()) {
+				if(allUserProfile.getUserId() == userProfile.getUserId()) {
+					logger.info("In controller - {}", "User ID "+ userProfile.getUserId() + " already exists.");
+					return new ResponseEntity<UserProfile>(HttpStatus.CONFLICT);
+				}
+			}
+		userProfileService.registerUser(userProfile);
+		logger.info("In controller - {}", "User Profile created: " +userProfile);
+		return new ResponseEntity<UserProfile>(HttpStatus.CREATED);
+	}
 
 	/*
 	 * Define a handler method which will get us all users.
@@ -68,9 +83,12 @@ public class UserProfileController {
 	 * This handler method should map to the URL "/api/v1/user" using HTTP GET
 	 * method.
 	 */
-	
-	
-	
+	@GetMapping("/user")
+	public ResponseEntity<UserProfile> getAllUserProfile(){
+		List<UserProfile> usersList = userProfileService.getAllUserProfiles();
+		logger.info("In controller - {}", "List of all User Profiles: "+usersList);
+		return new ResponseEntity<UserProfile>(HttpStatus.OK);
+	}
 
 	/*
 	 * Define a handler method which will update a specific userProfile by reading the
@@ -85,9 +103,16 @@ public class UserProfileController {
 	 * This handler method should map to the URL "/api/v1/user/{userId}" using HTTP PUT
 	 * method, where "userId" should be replaced by a valid userId without {}
 	 */
-	
-	
-	
+	@PutMapping("/user/{userId}")
+	public ResponseEntity<UserProfile> updateUserProfile(@PathVariable("userId") String userId, @RequestBody UserProfile userProfile) throws UserProfileNotExistsException{
+			if(userProfileService.getUserProfile(userId) != null) {
+				userProfileService.updateUserProfile(userProfile, userId);
+				logger.info("In controller - {}", "User Profile updated for User Id - " +userId + " is: " +userProfile);
+				return new ResponseEntity<UserProfile>(HttpStatus.OK);
+			}
+		logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
+		return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
+	}
 
 	/*
 	 * Define a handler method which will get us the user by a userId.
@@ -101,10 +126,18 @@ public class UserProfileController {
 	 * This handler method should map to the URL "/api/v1/user/{userId}" using HTTP GET
 	 * method, where "userId" should be replaced by a valid userId without {}
 	 */
-	
-	
-	
-	
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<Optional<UserProfile>> getUserProfileById(@PathVariable("userId") String userId) throws UserProfileNotExistsException {
+		UserProfile userProfileById = userProfileService.getUserProfile(userId);
+		if(userProfileById != null) {
+			logger.info("In controller - {}", "User Profile retreived for User Id - " +userId + " is: " +userProfileById);
+			return new ResponseEntity<Optional<UserProfile>>(HttpStatus.OK);
+		}
+		else {
+			logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
+			return new ResponseEntity<Optional<UserProfile>>(HttpStatus.NOT_FOUND);
+		}
+	}
 
 	/*
 	 * Define a handler method which will delete a userProfile from the database.
@@ -117,7 +150,14 @@ public class UserProfileController {
 	 * This handler method should map to the URL "/api/v1/user/{userId}" using HTTP
 	 * Delete method" where "userId" should be replaced by a valid userId without {}
 	 */
-	
-	
-	
+	@DeleteMapping("/user/{userId}")
+	public ResponseEntity<UserProfile> deleteUserProfile(@PathVariable("userId") String userId) throws UserProfileNotExistsException  {
+			if(userProfileService.getUserProfile(userId) != null) {
+				userProfileService.deleteUserProfile(userId);
+				logger.info("In controller - {}", "User Profile deleted for User Id - " +userId);
+				return new ResponseEntity<UserProfile>(HttpStatus.OK);
+			}
+		logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
+		return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
+	}
 }

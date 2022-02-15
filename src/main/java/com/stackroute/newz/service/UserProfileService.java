@@ -1,6 +1,7 @@
 package com.stackroute.newz.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.stackroute.newz.model.UserProfile;
 import com.stackroute.newz.util.exception.UserProfileAlreadyExistsException;

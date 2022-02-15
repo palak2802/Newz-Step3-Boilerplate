@@ -10,5 +10,9 @@ public class NewsNotExistsException extends Exception {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public NewsNotExistsException(String message){
+        super(message);
+    }
 
 }

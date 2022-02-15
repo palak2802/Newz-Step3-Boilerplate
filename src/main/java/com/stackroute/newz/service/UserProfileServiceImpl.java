@@ -1,6 +1,5 @@
 package com.stackroute.newz.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,54 +27,66 @@ public class UserProfileServiceImpl implements UserProfileService {
 	/*
 	 * Autowiring should be implemented for the UserProfileRepository.
 	 */
-	
-
+	@Autowired
+	private UserProfileRepository userprofileRepo; 
 
 	/*
 	 * Add a new user. Throw UserProfileAlreadyExistsException if the userProfile with specified
 	 * userId already exists.
 	 */
 	public UserProfile registerUser(UserProfile user) throws UserProfileAlreadyExistsException {
-
-		return null;
+		if(userprofileRepo.findById(user.getUserId()).isEmpty())
+			return userprofileRepo.save(user);
+		else
+			throw new UserProfileAlreadyExistsException("Can not Register the user. The user with "+user.getUserId() +" already exists in the database.");
 	}
 
 	/*
 	 * Update an existing userProfile by it's userId. Throw UserProfileNotExistsException 
 	 * if the userProfile with specified userId does not exist.
 	 */
-	public UserProfile updateUserProfile(UserProfile user, String userId) 
-			throws UserProfileNotExistsException {
-
-		return null;
+	public UserProfile updateUserProfile(UserProfile user, String userId) throws UserProfileNotExistsException {
+		Optional<UserProfile> userProfileById = userprofileRepo.findById(userId);
+		if(userProfileById.isEmpty())
+			throw new UserProfileNotExistsException("Can not Update the User Profile. The user with "+userId +" does not exists in the database.");
+		else {
+			userProfileById.get().setContact(user.getContact());
+			userProfileById.get().setCreateAt(user.getCreateAt());
+			userProfileById.get().setFirstName(user.getFirstName());
+			userProfileById.get().setLastName(user.getLastName());
+			userProfileById.get().setNewsList(user.getNewsList());
+			return userprofileRepo.save(user);
+		}
 	}
-
 	
 	/*
 	 * Delete an existing userProfile by it's userId. Throw UserProfileNotExistsException if 
 	 * the userProfile with specified userId does not exist.
 	 */
 	public void deleteUserProfile(String userId) throws UserProfileNotExistsException {
-		
-		
+		if(userprofileRepo.findById(userId).isEmpty())
+			throw new UserProfileNotExistsException("Can not Delete the User Profile. The user with "+userId +" does not exists in the database.");
+		else
+		userprofileRepo.deleteById(userId);
 	}
-	
 	
 	/*
 	 * Retrieve an existing userProfile by it's userId. Throw UserProfileNotExistsException 
 	 * if the userProfile with specified userId does not exist.
 	 */
 	public UserProfile getUserProfile(String userId) throws UserProfileNotExistsException {
-		
-		return null;
+		Optional<UserProfile> userProfileById = userprofileRepo.findById(userId);
+		if(userProfileById.isEmpty())
+			throw new UserProfileNotExistsException("Can not Retreive the User Profile. The user with "+userId +" does not exists in the database.");
+		else
+		return userProfileById.get();
 	}
 
 	/*
 	 * Retrieve all existing userProfiles
 	 */
 	public List<UserProfile> getAllUserProfiles() {
-		
-		return null;
+		return userprofileRepo.findAll();
 	}
 
 }

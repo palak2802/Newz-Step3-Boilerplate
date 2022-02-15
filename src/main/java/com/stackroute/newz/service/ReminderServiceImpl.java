@@ -18,19 +18,20 @@ import com.stackroute.newz.util.exception.ReminderNotExistsException;
  * clarifying it's role.
  * 
  * */
+@Service
 public class ReminderServiceImpl implements ReminderService {
 
 	/*
 	 * Autowiring should be implemented for the ReminderRepository.
 	 */
 	
-
+	@Autowired
+	private ReminderRepository reminderRepo;
 	/*
 	 * Add a new reminder.
 	 */
 	public Reminder addReminder(Reminder reminder) {
-
-		return null;
+		return reminderRepo.save(reminder);
 	}
 
 	/*
@@ -38,9 +39,13 @@ public class ReminderServiceImpl implements ReminderService {
 	 * if the reminder with specified reminderId does not exist.
 	 */
 	public Reminder updateReminder(Reminder reminder) throws ReminderNotExistsException {
-
-		return null;
-
+		Optional<Reminder> reminderById = reminderRepo.findById(reminder.getReminderId());
+		if(reminderById.isEmpty()) {
+			throw new ReminderNotExistsException("Can not Update the reminder. The reminder with "+reminder.getReminderId() +" does not exists in the database.");
+		}
+		reminderById.get().setNews(reminder.getNews());
+		reminderById.get().setSchedule(reminder.getSchedule());
+		return reminderRepo.save(reminder);
 	}
 
 	/*
@@ -48,8 +53,11 @@ public class ReminderServiceImpl implements ReminderService {
 	 * the reminder with specified reminderId does not exist.
 	 */
 	public void deleteReminder(int reminderId) throws ReminderNotExistsException {
-
-	
+		Optional<Reminder> reminderById = reminderRepo.findById(reminderId);
+		if(reminderById.isEmpty()) {
+			throw new ReminderNotExistsException("Can not Delete the reminder. The reminder with "+reminderId +" does not exists in the database.");
+		}
+		reminderRepo.deleteById(reminderId);
 	}
 
 	/*
@@ -57,15 +65,18 @@ public class ReminderServiceImpl implements ReminderService {
 	 * if the reminder with specified reminderId does not exist.
 	 */
 	public Reminder getReminder(int reminderId) throws ReminderNotExistsException {
-
-		return null;
+		Optional<Reminder> reminderById = reminderRepo.findById(reminderId);
+		if(reminderById.isEmpty()) {
+			throw new ReminderNotExistsException("Can not Retreive the reminder. The reminder with "+reminderId +" does not exists in the database.");
+		}
+		return reminderById.get();
 	}
 
 	/*
 	 * Retrieve all existing reminders
 	 */
 	public List<Reminder> getAllReminders() {
-		return null;
+		return reminderRepo.findAll();
 	}
 
 }

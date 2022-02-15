@@ -2,13 +2,17 @@ package com.stackroute.newz.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
@@ -19,7 +23,8 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
  * If it finds any, then it will begin the process of looking through that particular 
  * Java object to recreate it as a table in your database.
  */
-
+@Entity
+@Table(name = "Reminder")
 public class Reminder {
 	/*
 	 * This class should have three fields (reminderId,schedule,news). Out of these
@@ -33,44 +38,54 @@ public class Reminder {
 	 * The data type for schedule field should be LocalDateTime. Please
 	 * add @JsonSerialize(using = ToStringSerializer.class) for this field
 	 */
-
-	public Reminder(int reminderId, LocalDateTime schedule, News news) {
-
-	}
-
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Integer reminderId;
+	@JsonSerialize(using = ToStringSerializer.class)
+	private LocalDateTime schedule;
+	@OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "newsId")
+	@JsonIgnore
+	private News news;
+	
 	public Reminder() {
-
+		super();
 	}
-
 	
-	public int getReminderId() {
-		return 0;
+	public Reminder(Integer reminderId, LocalDateTime schedule, News news) {
+		super();
+		this.reminderId = reminderId;
+		this.schedule = schedule;
+		this.news = news;
 	}
 
-	
-	public void setReminderId(int reminderId) {
-
+	public Integer getReminderId() {
+		return reminderId;
 	}
 
-
-	public int getNewsId() {
-		return 0;
+	public void setReminderId(Integer reminderId) {
+		this.reminderId = reminderId;
 	}
 
-	public void setNewsId(int newsId) {
-		
-	}
-
-	
 	public LocalDateTime getSchedule() {
-		return null;
+		return schedule;
 	}
 
-	
 	public void setSchedule(LocalDateTime schedule) {
-		
+		this.schedule = schedule;
 	}
 
-	
+	public News getNews() {
+		return news;
+	}
+
+	public void setNews(News news) {
+		this.news = news;
+	}
+
+	@Override
+	public String toString() {
+		return "Reminder [reminderId=" + reminderId + ", schedule=" + schedule + ", news=" + news + "]";
+	}
 
 }

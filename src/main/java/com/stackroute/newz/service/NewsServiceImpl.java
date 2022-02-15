@@ -1,5 +1,6 @@
 package com.stackroute.newz.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,21 +21,25 @@ import com.stackroute.newz.util.exception.NewsNotExistsException;
  * clarifying it's role.
  * 
  * */
-
+@Service
 public class NewsServiceImpl implements NewsService {
 
 	/*
 	 * Autowiring should be implemented for the NewsRepository.
 	 */
-	
+	@Autowired
+	private NewsRepository newsRepo;
 
 	/*
 	 * Add a new news. Throw NewsAlreadyExistsException if the news with specified
 	 * newsId already exists.
 	 */
 	public News addNews(News news) throws NewsAlreadyExistsException {
-		
-		return null;
+		Optional<News> newsbyid = newsRepo.findById(news.getNewsId());
+		if(newsbyid.isEmpty())
+			return newsRepo.save(news);
+		else
+			throw new NewsAlreadyExistsException("Can not Add the news. The news with "+news.getNewsId() +" already exists in the database.");
 	}
 
 	/*
@@ -42,26 +47,43 @@ public class NewsServiceImpl implements NewsService {
 	 * news with specified newsId does not exist.
 	 */
 	public News getNews(int newsId) throws NewsNotExistsException {
-		
-		return null;
+		Optional<News> news = newsRepo.findById(newsId);
+		System.out.println("*******************************************");
+		System.out.println("In getNews newsById: "+news);
+		if(news.isEmpty()) {
+			throw new NewsNotExistsException("Can not Retrieve the news. The news with "+newsId +" does not exists in the database.");
+		}
+		return news.get();
 	}
 
 	/*
 	 * Retrieve all existing news
 	 */
 	public List<News> getAllNews() {
-
-		return null;
+		return newsRepo.findAll();
 	}
 
-	
 	/*
 	 * Update an existing news by it's newsId. Throw NewsNotExistsException if the 
 	 * news with specified newsId does not exist.
 	 */
 	public News updateNews(News news) throws NewsNotExistsException {
-		
-		return null;
+		Optional<News> newsById = newsRepo.findById(news.getNewsId());
+		System.out.println("*******************************************");
+		System.out.println("In Update newsById: "+newsById);
+		if(newsById.isEmpty()) {
+			throw new NewsNotExistsException("Can not Update the news. The news with "+news.getNewsId() +" does not exists in the database.");
+		}else {
+		newsById.get().setAuthor(news.getAuthor());
+		newsById.get().setContent(news.getContent());
+		newsById.get().setDescription(news.getDescription());
+		newsById.get().setTitle(news.getTitle());
+		newsById.get().setUrl(news.getUrl());
+		newsById.get().setUrlToImage(news.getUrlToImage());
+		newsById.get().setReminder(news.getReminder());
+		newsById.get().setUser(news.getUser());
+		return newsRepo.save(newsById.get());
+		}
 	}
 
 	/*
@@ -69,8 +91,13 @@ public class NewsServiceImpl implements NewsService {
 	 * news with specified newsId does not exist.
 	 */
 	public void deleteNews(int newsId) throws NewsNotExistsException {
-
-
+		Optional<News> newsById = newsRepo.findById(newsId);
+		System.out.println("*******************************************");
+		System.out.println("In Delete newsById: "+newsById);
+		if(newsById.isEmpty()) {
+			throw new NewsNotExistsException("Can not Delete the news. The news with "+newsId +" does not exists in the database.");
+		}
+		newsRepo.deleteById(newsId);
 	}
 
 }
