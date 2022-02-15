@@ -39,13 +39,13 @@ public class ReminderServiceImpl implements ReminderService {
 	 * if the reminder with specified reminderId does not exist.
 	 */
 	public Reminder updateReminder(Reminder reminder) throws ReminderNotExistsException {
-		Optional<Reminder> reminderById = reminderRepo.findById(reminder.getReminderId());
-		if(reminderById.isEmpty()) {
+		Reminder reminderToUpdate = reminderRepo.getOne(reminder.getReminderId());
+		if(reminderToUpdate == null) {
 			throw new ReminderNotExistsException("Can not Update the reminder. The reminder with "+reminder.getReminderId() +" does not exists in the database.");
 		}
-		reminderById.get().setNews(reminder.getNews());
-		reminderById.get().setSchedule(reminder.getSchedule());
-		return reminderRepo.save(reminder);
+		reminderToUpdate.setNews(reminder.getNews());
+		reminderToUpdate.setSchedule(reminder.getSchedule());
+		return reminderRepo.saveAndFlush(reminderToUpdate);
 	}
 
 	/*
@@ -53,8 +53,8 @@ public class ReminderServiceImpl implements ReminderService {
 	 * the reminder with specified reminderId does not exist.
 	 */
 	public void deleteReminder(int reminderId) throws ReminderNotExistsException {
-		Optional<Reminder> reminderById = reminderRepo.findById(reminderId);
-		if(reminderById.isEmpty()) {
+		Reminder reminderToDelete = reminderRepo.getOne(reminderId);
+		if(reminderToDelete == null) {
 			throw new ReminderNotExistsException("Can not Delete the reminder. The reminder with "+reminderId +" does not exists in the database.");
 		}
 		reminderRepo.deleteById(reminderId);

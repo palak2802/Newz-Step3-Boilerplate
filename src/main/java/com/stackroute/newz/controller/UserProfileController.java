@@ -68,7 +68,7 @@ public class UserProfileController {
 			}
 		userProfileService.registerUser(userProfile);
 		logger.info("In controller - {}", "User Profile created: " +userProfile);
-		return new ResponseEntity<UserProfile>(HttpStatus.CREATED);
+		return new ResponseEntity<UserProfile>(userProfile, HttpStatus.CREATED);
 	}
 
 	/*
@@ -84,10 +84,10 @@ public class UserProfileController {
 	 * method.
 	 */
 	@GetMapping("/user")
-	public ResponseEntity<UserProfile> getAllUserProfile(){
+	public ResponseEntity<List<UserProfile>> getAllUserProfile(){
 		List<UserProfile> usersList = userProfileService.getAllUserProfiles();
 		logger.info("In controller - {}", "List of all User Profiles: "+usersList);
-		return new ResponseEntity<UserProfile>(HttpStatus.OK);
+		return new ResponseEntity<List<UserProfile>>(usersList, HttpStatus.OK);
 	}
 
 	/*
@@ -108,7 +108,7 @@ public class UserProfileController {
 			if(userProfileService.getUserProfile(userId) != null) {
 				userProfileService.updateUserProfile(userProfile, userId);
 				logger.info("In controller - {}", "User Profile updated for User Id - " +userId + " is: " +userProfile);
-				return new ResponseEntity<UserProfile>(HttpStatus.OK);
+				return new ResponseEntity<UserProfile>(userProfile, HttpStatus.OK);
 			}
 		logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
 		return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
@@ -127,15 +127,15 @@ public class UserProfileController {
 	 * method, where "userId" should be replaced by a valid userId without {}
 	 */
 	@GetMapping("/user/{userId}")
-	public ResponseEntity<Optional<UserProfile>> getUserProfileById(@PathVariable("userId") String userId) throws UserProfileNotExistsException {
+	public ResponseEntity<UserProfile> getUserProfileById(@PathVariable("userId") String userId) throws UserProfileNotExistsException {
 		UserProfile userProfileById = userProfileService.getUserProfile(userId);
 		if(userProfileById != null) {
 			logger.info("In controller - {}", "User Profile retreived for User Id - " +userId + " is: " +userProfileById);
-			return new ResponseEntity<Optional<UserProfile>>(HttpStatus.OK);
+			return new ResponseEntity<UserProfile>(userProfileById, HttpStatus.OK);
 		}
 		else {
 			logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
-			return new ResponseEntity<Optional<UserProfile>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
 		}
 	}
 

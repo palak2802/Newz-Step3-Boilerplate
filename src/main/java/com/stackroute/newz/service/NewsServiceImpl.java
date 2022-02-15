@@ -35,12 +35,16 @@ public class NewsServiceImpl implements NewsService {
 	 * newsId already exists.
 	 */
 	public News addNews(News news) throws NewsAlreadyExistsException {
-		Optional<News> newsbyid = newsRepo.findById(news.getNewsId());
-		if(newsbyid.isEmpty())
+		News newsbyid = newsRepo.getOne(news.getNewsId());
+		System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
+		System.out.println("newsbyid: "+newsbyid);
+		if(newsbyid == null)
 			return newsRepo.save(news);
-		else
+		else {
+			System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
+			System.out.println("NewsAlreadyExistsException");
 			throw new NewsAlreadyExistsException("Can not Add the news. The news with "+news.getNewsId() +" already exists in the database.");
-	}
+	}}
 
 	/*
 	 * Retrieve an existing news by it's newsId. Throw NewsNotExistsException if the 
@@ -68,21 +72,21 @@ public class NewsServiceImpl implements NewsService {
 	 * news with specified newsId does not exist.
 	 */
 	public News updateNews(News news) throws NewsNotExistsException {
-		Optional<News> newsById = newsRepo.findById(news.getNewsId());
+		News newsToUpdate = newsRepo.getOne(news.getNewsId());
 		System.out.println("*******************************************");
-		System.out.println("In Update newsById: "+newsById);
-		if(newsById.isEmpty()) {
+		System.out.println("In Update newsToUpdate: "+newsToUpdate);
+		if(newsToUpdate == null) {
 			throw new NewsNotExistsException("Can not Update the news. The news with "+news.getNewsId() +" does not exists in the database.");
 		}else {
-		newsById.get().setAuthor(news.getAuthor());
-		newsById.get().setContent(news.getContent());
-		newsById.get().setDescription(news.getDescription());
-		newsById.get().setTitle(news.getTitle());
-		newsById.get().setUrl(news.getUrl());
-		newsById.get().setUrlToImage(news.getUrlToImage());
-		newsById.get().setReminder(news.getReminder());
-		newsById.get().setUser(news.getUser());
-		return newsRepo.save(newsById.get());
+			newsToUpdate.setAuthor(news.getAuthor());
+			newsToUpdate.setContent(news.getContent());
+			newsToUpdate.setDescription(news.getDescription());
+			newsToUpdate.setTitle(news.getTitle());
+			newsToUpdate.setUrl(news.getUrl());
+			newsToUpdate.setUrlToImage(news.getUrlToImage());
+			newsToUpdate.setReminder(news.getReminder());
+			newsToUpdate.setUser(news.getUser());
+		return newsRepo.saveAndFlush(newsToUpdate);
 		}
 	}
 
@@ -91,10 +95,12 @@ public class NewsServiceImpl implements NewsService {
 	 * news with specified newsId does not exist.
 	 */
 	public void deleteNews(int newsId) throws NewsNotExistsException {
-		Optional<News> newsById = newsRepo.findById(newsId);
-		System.out.println("*******************************************");
+		News newsById = newsRepo.getOne(newsId);
+		System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
 		System.out.println("In Delete newsById: "+newsById);
-		if(newsById.isEmpty()) {
+		if(newsById == null) {
+			System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
+			System.out.println("NewsNotExistsException");
 			throw new NewsNotExistsException("Can not Delete the news. The news with "+newsId +" does not exists in the database.");
 		}
 		newsRepo.deleteById(newsId);

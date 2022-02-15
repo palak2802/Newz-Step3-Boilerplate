@@ -53,10 +53,10 @@ public class ReminderController {
 	 * method.
 	 */
 	@GetMapping("/reminder")
-	public ResponseEntity<Reminder> getAllReminders(){
+	public ResponseEntity<List<Reminder>> getAllReminders(){
 		List<Reminder> reminderList = reminderService.getAllReminders();
 		logger.info("In controller - {}", "List of all Reminders: "+reminderList);
-		return new ResponseEntity<Reminder>(HttpStatus.OK);
+		return new ResponseEntity<List<Reminder>>(reminderList, HttpStatus.OK);
 	}
 
 	/*
@@ -72,15 +72,15 @@ public class ReminderController {
 	 * method, where "reminderId" should be replaced by a valid reminderId without {}
 	 */
 	@GetMapping("/reminder/{reminderId}")
-	public ResponseEntity<Optional<Reminder>> getReminderById(@PathVariable Integer reminderId) throws ReminderNotExistsException{
+	public ResponseEntity<Reminder> getReminderById(@PathVariable Integer reminderId) throws ReminderNotExistsException{
 		Reminder reminderById = reminderService.getReminder(reminderId);
 		if(reminderById == null) {
 			logger.info("In controller - {}", "Reminder ID "+reminderId+ " not Found.");
-			return new ResponseEntity<Optional<Reminder>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
 		}
 		else {
 			logger.info("In controller - {}", "The Reminder for Reminder Id - " +reminderId+ " is: "+reminderById);
-			return new ResponseEntity<Optional<Reminder>>(HttpStatus.OK);
+			return new ResponseEntity<Reminder>(reminderById, HttpStatus.OK);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class ReminderController {
 		}
 		reminderService.addReminder(reminder);
 		logger.info("In controller - {}", "Reminder created: " +reminder);
-		return new ResponseEntity<Reminder>(HttpStatus.CREATED);
+		return new ResponseEntity<Reminder>(reminder, HttpStatus.CREATED);
 	}
 
 	/*
@@ -128,7 +128,7 @@ public class ReminderController {
 			if(reminderService.getReminder(reminderId) != null) {
 				reminderService.updateReminder(reminder);
 				logger.info("In controller - {}", "Reminder updated for Reminder Id - " +reminderId + " is: " +reminder);
-				return new ResponseEntity<Reminder>(HttpStatus.OK);
+				return new ResponseEntity<Reminder>(reminder, HttpStatus.OK);
 			}
 		logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
 		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
