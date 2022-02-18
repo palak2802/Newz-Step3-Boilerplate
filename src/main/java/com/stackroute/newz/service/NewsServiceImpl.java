@@ -1,6 +1,5 @@
 package com.stackroute.newz.service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,13 +35,9 @@ public class NewsServiceImpl implements NewsService {
 	 */
 	public News addNews(News news) throws NewsAlreadyExistsException {
 		News newsbyid = newsRepo.getOne(news.getNewsId());
-		System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
-		System.out.println("newsbyid: "+newsbyid);
 		if(newsbyid == null)
 			return newsRepo.save(news);
 		else {
-			System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
-			System.out.println("NewsAlreadyExistsException");
 			throw new NewsAlreadyExistsException("Can not Add the news. The news with "+news.getNewsId() +" already exists in the database.");
 	}}
 
@@ -52,8 +47,6 @@ public class NewsServiceImpl implements NewsService {
 	 */
 	public News getNews(int newsId) throws NewsNotExistsException {
 		Optional<News> news = newsRepo.findById(newsId);
-		System.out.println("*******************************************");
-		System.out.println("In getNews newsById: "+news);
 		if(news.isEmpty()) {
 			throw new NewsNotExistsException("Can not Retrieve the news. The news with "+newsId +" does not exists in the database.");
 		}
@@ -73,8 +66,6 @@ public class NewsServiceImpl implements NewsService {
 	 */
 	public News updateNews(News news) throws NewsNotExistsException {
 		News newsToUpdate = newsRepo.getOne(news.getNewsId());
-		System.out.println("*******************************************");
-		System.out.println("In Update newsToUpdate: "+newsToUpdate);
 		if(newsToUpdate == null) {
 			throw new NewsNotExistsException("Can not Update the news. The news with "+news.getNewsId() +" does not exists in the database.");
 		}else {
@@ -96,11 +87,7 @@ public class NewsServiceImpl implements NewsService {
 	 */
 	public void deleteNews(int newsId) throws NewsNotExistsException {
 		News newsById = newsRepo.getOne(newsId);
-		System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
-		System.out.println("In Delete newsById: "+newsById);
 		if(newsById == null) {
-			System.out.println("sssssssssssssssssssssssssssssssssssssssssss");
-			System.out.println("NewsNotExistsException");
 			throw new NewsNotExistsException("Can not Delete the news. The news with "+newsId +" does not exists in the database.");
 		}
 		newsRepo.deleteById(newsId);

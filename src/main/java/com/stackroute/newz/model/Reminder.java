@@ -41,19 +41,19 @@ public class Reminder {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer reminderId;
+	
 	@JsonSerialize(using = ToStringSerializer.class)
 	private LocalDateTime schedule;
-	@OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "newsId")
+	
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "news_Id")
 	@JsonIgnore
 	private News news;
 	
 	public Reminder() {
-		super();
 	}
 	
 	public Reminder(Integer reminderId, LocalDateTime schedule, News news) {
-		super();
 		this.reminderId = reminderId;
 		this.schedule = schedule;
 		this.news = news;
@@ -81,11 +81,6 @@ public class Reminder {
 
 	public void setNews(News news) {
 		this.news = news;
-	}
-
-	@Override
-	public String toString() {
-		return "Reminder [reminderId=" + reminderId + ", schedule=" + schedule + ", news=" + news + "]";
 	}
 
 }

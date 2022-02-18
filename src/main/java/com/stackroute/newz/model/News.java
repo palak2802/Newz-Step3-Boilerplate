@@ -48,21 +48,23 @@ public class News {
 	private String title;
 	private String author;
 	private String description;
+	
 	@JsonSerialize(using = ToStringSerializer.class)
 	private LocalDateTime publishedAt;
 	private String content;
 	private String url;
 	private String urlToImage;
+	
 	@ManyToOne(cascade= CascadeType.ALL)
     @JoinColumn(name = "userId")
 	@JsonIgnore
 	private UserProfile user;
-	@OneToOne(mappedBy = "news")
+	
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "news")
 	@JsonIgnore
 	private Reminder reminder;
 	
 	public News() {
-		super();
 		this.publishedAt = LocalDateTime.now();
 	}
 	
@@ -158,13 +160,6 @@ public class News {
 
 	public void setReminder(Reminder reminder) {
 		this.reminder = reminder;
-	}
-
-	@Override
-	public String toString() {
-		return "News [newsId=" + newsId + ", title=" + title + ", author=" + author + ", description=" + description
-				+ ", publishedAt=" + publishedAt + ", content=" + content + ", url=" + url + ", urlToImage="
-				+ urlToImage + ", user=" + user + ", reminder=" + reminder + "]";
 	}
 	
 }

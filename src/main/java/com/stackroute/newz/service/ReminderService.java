@@ -1,7 +1,6 @@
 package com.stackroute.newz.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.stackroute.newz.model.Reminder;
 import com.stackroute.newz.util.exception.ReminderNotExistsException;

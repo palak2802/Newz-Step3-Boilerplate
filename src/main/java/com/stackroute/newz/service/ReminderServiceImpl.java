@@ -39,13 +39,18 @@ public class ReminderServiceImpl implements ReminderService {
 	 * if the reminder with specified reminderId does not exist.
 	 */
 	public Reminder updateReminder(Reminder reminder) throws ReminderNotExistsException {
+		try {
 		Reminder reminderToUpdate = reminderRepo.getOne(reminder.getReminderId());
-		if(reminderToUpdate == null) {
+		if(!reminderToUpdate.equals(null)) {
+			reminderToUpdate.setNews(reminder.getNews());
+			reminderToUpdate.setSchedule(reminder.getSchedule());
+			Reminder reminderUpdated =  reminderRepo.saveAndFlush(reminderToUpdate);
+			return reminderUpdated;
+		}}
+		catch(Exception e) {
 			throw new ReminderNotExistsException("Can not Update the reminder. The reminder with "+reminder.getReminderId() +" does not exists in the database.");
 		}
-		reminderToUpdate.setNews(reminder.getNews());
-		reminderToUpdate.setSchedule(reminder.getSchedule());
-		return reminderRepo.saveAndFlush(reminderToUpdate);
+		return null;
 	}
 
 	/*
