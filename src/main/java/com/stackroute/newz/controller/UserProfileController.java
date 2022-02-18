@@ -60,13 +60,18 @@ public class UserProfileController {
 	 */
 	@PostMapping("/user")
 	public ResponseEntity<UserProfile> createUserProfile(@RequestBody UserProfile userProfile) throws UserProfileAlreadyExistsException{
+		try{
 			for(UserProfile allUserProfile: userProfileService.getAllUserProfiles()) {
 				if(allUserProfile.getUserId() == userProfile.getUserId()) {
 					logger.info("In controller - {}", "User ID "+ userProfile.getUserId() + " already exists.");
 					return new ResponseEntity<UserProfile>(HttpStatus.CONFLICT);
 				}
 			}
-		userProfileService.registerUser(userProfile);
+			userProfileService.registerUser(userProfile);
+		}
+		catch(Exception e) {
+			throw new UserProfileAlreadyExistsException("User Profile already exists in DB.");
+		}
 		logger.info("In controller - {}", "User Profile created: " +userProfile);
 		return new ResponseEntity<UserProfile>(userProfile, HttpStatus.CREATED);
 	}
@@ -85,9 +90,14 @@ public class UserProfileController {
 	 */
 	@GetMapping("/user")
 	public ResponseEntity<List<UserProfile>> getAllUserProfile(){
-		List<UserProfile> usersList = userProfileService.getAllUserProfiles();
-		logger.info("In controller - {}", "List of all User Profiles: "+usersList);
-		return new ResponseEntity<List<UserProfile>>(usersList, HttpStatus.OK);
+		try {
+			List<UserProfile> usersList = userProfileService.getAllUserProfiles();
+			logger.info("In controller - {}", "List of all User Profiles: "+usersList);
+			return new ResponseEntity<List<UserProfile>>(usersList, HttpStatus.OK);
+		}catch(Exception e) {
+			
+		}
+		return null;
 	}
 
 	/*
@@ -105,11 +115,15 @@ public class UserProfileController {
 	 */
 	@PutMapping("/user/{userId}")
 	public ResponseEntity<UserProfile> updateUserProfile(@PathVariable("userId") String userId, @RequestBody UserProfile userProfile) throws UserProfileNotExistsException{
-			if(userProfileService.getUserProfile(userId) != null) {
+		try {	
+		if(userProfileService.getUserProfile(userId) != null) {
 				userProfileService.updateUserProfile(userProfile, userId);
 				logger.info("In controller - {}", "User Profile updated for User Id - " +userId + " is: " +userProfile);
 				return new ResponseEntity<UserProfile>(userProfile, HttpStatus.OK);
 			}
+		}catch(Exception e){
+			throw new UserProfileNotExistsException("Can not Update the User Profile as it does not exists in the database.");
+		}
 		logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
 		return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
 	}
@@ -127,16 +141,18 @@ public class UserProfileController {
 	 * method, where "userId" should be replaced by a valid userId without {}
 	 */
 	@GetMapping("/user/{userId}")
-	public ResponseEntity<UserProfile> getUserProfileById(@PathVariable("userId") String userId) throws UserProfileNotExistsException {
+	public ResponseEntity<UserProfile> getUserProfileById(@PathVariable("userId") String userId){
+		try {
 		UserProfile userProfileById = userProfileService.getUserProfile(userId);
 		if(userProfileById != null) {
 			logger.info("In controller - {}", "User Profile retreived for User Id - " +userId + " is: " +userProfileById);
 			return new ResponseEntity<UserProfile>(userProfileById, HttpStatus.OK);
+		}}
+		catch(Exception e) {
+			e.printStackTrace();
 		}
-		else {
 			logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
 			return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
-		}
 	}
 
 	/*
@@ -151,12 +167,16 @@ public class UserProfileController {
 	 * Delete method" where "userId" should be replaced by a valid userId without {}
 	 */
 	@DeleteMapping("/user/{userId}")
-	public ResponseEntity<UserProfile> deleteUserProfile(@PathVariable("userId") String userId) throws UserProfileNotExistsException  {
-			if(userProfileService.getUserProfile(userId) != null) {
+	public ResponseEntity<UserProfile> deleteUserProfile(@PathVariable("userId") String userId)  {
+		try {	
+		if(userProfileService.getUserProfile(userId) != null) {
 				userProfileService.deleteUserProfile(userId);
 				logger.info("In controller - {}", "User Profile deleted for User Id - " +userId);
 				return new ResponseEntity<UserProfile>(HttpStatus.OK);
 			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		logger.info("In controller - {}", "User Profile not found for User Id - " +userId);
 		return new ResponseEntity<UserProfile>(HttpStatus.NOT_FOUND);
 	}
