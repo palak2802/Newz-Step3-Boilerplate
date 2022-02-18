@@ -46,7 +46,7 @@ public class Reminder {
 	private LocalDateTime schedule;
 	
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "news_Id")
+    @JoinColumn(name = "newsId", referencedColumnName = "newsId")
 	@JsonIgnore
 	private News news;
 	
