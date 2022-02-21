@@ -1,7 +1,6 @@
 package com.stackroute.newz.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,16 +71,20 @@ public class ReminderController {
 	 * method, where "reminderId" should be replaced by a valid reminderId without {}
 	 */
 	@GetMapping("/reminder/{reminderId}")
-	public ResponseEntity<Reminder> getReminderById(@PathVariable Integer reminderId) throws ReminderNotExistsException{
-		Reminder reminderById = reminderService.getReminder(reminderId);
-		if(reminderById == null) {
+	public ResponseEntity<Reminder> getReminderById(@PathVariable Integer reminderId){
+		Reminder reminderById;
+		try {
+			reminderById = reminderService.getReminder(reminderId);
+			if(reminderById != null) {
+				logger.info("In controller - {}", "The Reminder for Reminder Id - " +reminderId+ " is: "+reminderById);
+				return new ResponseEntity<Reminder>(reminderById, HttpStatus.OK);
+			}
+		} catch (ReminderNotExistsException e) {
 			logger.info("In controller - {}", "Reminder ID "+reminderId+ " not Found.");
 			return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
 		}
-		else {
-			logger.info("In controller - {}", "The Reminder for Reminder Id - " +reminderId+ " is: "+reminderById);
-			return new ResponseEntity<Reminder>(reminderById, HttpStatus.OK);
-		}
+		logger.info("In controller - {}", "Reminder ID "+reminderId+ " not Found.");
+		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
 	}
 
 	/*
@@ -124,12 +127,17 @@ public class ReminderController {
 	 * method, where "reminderId" should be replaced by a valid reminderId without {}
 	 */
 	@PutMapping("/reminder/{reminderId}")
-	public ResponseEntity<Reminder> updateReminder(@PathVariable("reminderId") Integer reminderId, @RequestBody Reminder reminder) throws ReminderNotExistsException {
-			if(reminderService.getReminder(reminderId) != null) {
-				reminderService.updateReminder(reminder);
+	public ResponseEntity<Reminder> updateReminder(@PathVariable("reminderId") Integer reminderId, @RequestBody Reminder reminder){
+		try {
+			Reminder reminderUpdated = reminderService.updateReminder(reminder);
+			if(reminderUpdated != null) {
 				logger.info("In controller - {}", "Reminder updated for Reminder Id - " +reminderId + " is: " +reminder);
-				return new ResponseEntity<Reminder>(reminder, HttpStatus.OK);
+				return new ResponseEntity<Reminder>(reminderUpdated, HttpStatus.OK);
 			}
+		} catch (ReminderNotExistsException e) {
+			logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
+			return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
+		}
 		logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
 		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
 	}
@@ -147,13 +155,15 @@ public class ReminderController {
 	 */
 	
 	@DeleteMapping("/reminder/{reminderId}")
-	public ResponseEntity<Reminder> deleteReminder(@PathVariable("reminderId") Integer reminderId) throws ReminderNotExistsException {
-			if(reminderService.getReminder(reminderId) != null) {
-				reminderService.deleteReminder(reminderId);
-				logger.info("In controller - {}", "Reminder deleted for Reminder Id - " +reminderId);
-				return new ResponseEntity<Reminder>(HttpStatus.OK);
+	public ResponseEntity<Reminder> deleteReminder(@PathVariable("reminderId") Integer reminderId){
+		try {
+			reminderService.deleteReminder(reminderId);
+			logger.info("In controller - {}", "Reminder deleted for Reminder Id - " +reminderId);
+			return new ResponseEntity<Reminder>(HttpStatus.OK);
 			}
-		logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
-		return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
+		catch (ReminderNotExistsException e) {
+			logger.info("In controller - {}", "Reminder not found for Reminder Id - " +reminderId);
+			return new ResponseEntity<Reminder>(HttpStatus.NOT_FOUND);
+		}
 	}
 }

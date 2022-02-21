@@ -1,12 +1,10 @@
 package com.stackroute.newz.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -129,18 +127,19 @@ public class NewsController {
 	 */
 
 	@PutMapping("/news/{newsId}")
-	public ResponseEntity<News> updateNews(@PathVariable("newsId") Integer newsId, @RequestBody News news) throws NewsNotExistsException{
-			News getNews = newsService.getNews(newsId);
-			System.out.println("*******************************************");
-			System.out.println("Update newsService.getNews(newsId): "+getNews);
-			if(getNews != null) {
-				newsService.updateNews(news);
+	public ResponseEntity<News> updateNews(@PathVariable("newsId") Integer newsId, @RequestBody News news){
+		try{
+			News newsUpdated = newsService.updateNews(news);
+			if(newsUpdated != null) {
 				logger.info("In controller - {}", "News updated for news Id - " +newsId + " is: " +news);
-				return new ResponseEntity<News>(newsService.getNews(newsId), HttpStatus.OK);
-			}else {
-				logger.info("In controller - {}", "News not found for news Id - " +newsId);
-				return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
+				return new ResponseEntity<News>(newsUpdated, HttpStatus.OK);
 			}
+		}
+		catch(NewsNotExistsException e) {
+			return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
+		}
+		logger.info("In controller - {}", "News not found for news Id - " +newsId);
+		return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
 	}
 	
 	/*
@@ -155,18 +154,14 @@ public class NewsController {
 	 */
 	
 	@DeleteMapping("/news/{newsId}")
-	public ResponseEntity<News> deleteNews(@PathVariable("newsId") Integer newsId) throws NewsNotExistsException{
-			News getNews = newsService.getNews(newsId);
-			System.out.println("*******************************************");
-			System.out.println("Delete newsService.getNews(newsId): "+getNews);
-			if(getNews != null) {
-				newsService.deleteNews(newsId);
-				logger.info("In controller - {}", "News deleted for news Id - " +newsId);
-				return new ResponseEntity<News>(HttpStatus.OK);
-			}
-			else {
+	public ResponseEntity<News> deleteNews(@PathVariable("newsId") Integer newsId){
+		try {
+			newsService.deleteNews(newsId);
+			logger.info("In controller - {}", "News deleted for news Id - " +newsId);
+			return new ResponseEntity<News>(HttpStatus.OK);
+		} catch (NewsNotExistsException e) {
 			logger.info("In controller - {}", "News not found for news Id - " +newsId);
 			return new ResponseEntity<News>(HttpStatus.NOT_FOUND);
-			}
+		}
 	}
 }

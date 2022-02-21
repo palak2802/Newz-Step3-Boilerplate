@@ -19,10 +19,10 @@ public class NewzApplication {
 	 * framework. Code below integrates your main() with SpringBoot.
 	 */
 	
-	@Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
-    }
+//	@Bean
+//    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+//        return builder.build();
+//    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(NewzApplication.class, args);
