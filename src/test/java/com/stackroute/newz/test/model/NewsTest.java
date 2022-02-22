@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.meanbean.test.BeanTester;
 
 import com.stackroute.newz.model.News;
+import com.stackroute.newz.model.UserProfile;
 
 class NewsTest {
 
@@ -39,8 +40,7 @@ class NewsTest {
 	public void Beantest() {
 		BeanTester beanTester = new BeanTester();
         beanTester.getFactoryCollection().addFactory(LocalDateTime.class, new LocalDateTimeFactory());
-        beanTester.testBean(News.class);
-
+        beanTester.testBean(UserProfile.class);
 
 	}
 

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.meanbean.test.BeanTester;
 
 import com.stackroute.newz.model.Reminder;
+import com.stackroute.newz.model.UserProfile;
 
 class ReminderTest {
 
@@ -34,9 +35,7 @@ class ReminderTest {
 	public void Beantest() {
 		BeanTester beanTester = new BeanTester();
         beanTester.getFactoryCollection().addFactory(LocalDateTime.class, new LocalDateTimeFactory());
-        beanTester.testBean(Reminder.class);
-
-
+        beanTester.testBean(UserProfile.class);
 	}
 
 }
